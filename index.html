@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laptop Checkout System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>Laptop Checkout System</h1>
+  
+  <h2>Laptops</h2>
+  <table id="laptop-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Model</th>
+        <th>Status</th>
+        <th>Checked Out By</th>
+        <th>Checked Out At</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Fetch laptops and display them
+    async function fetchLaptops() {
+      const response = await fetch('/laptops');
+      const laptops = await response.json();
+      const tableBody = document.querySelector('#laptop-table tbody');
+      tableBody.innerHTML = ''; // Clear existing rows
+      laptops.forEach((laptop) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${laptop.id}</td>
+          <td>${laptop.model}</td>
+          <td>${laptop.status}</td>
+          <td>${laptop.checkedOutBy || '-'}</td>
+          <td>${laptop.checkedOutAt || '-'}</td>
+          <td>
+            <button 
+              ${laptop.status === 'checked out' ? 'class="disabled" disabled' : ''} 
+              onclick="checkOutLaptop(${laptop.id})">
+              Check Out
+            </button>
+            <button 
+              ${laptop.status === 'available' ? 'class="disabled" disabled' : ''} 
+              onclick="checkInLaptop(${laptop.id})">
+              Check In
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Check out a laptop
+    async function checkOutLaptop(id) {
+      const user = prompt('Enter your name to check out this laptop:');
+      if (!user) return alert('User name is required to check out a laptop.');
+
+      const response = await fetch('/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, user }),
+      });
+
+      if (response.ok) {
+        alert('Laptop checked out successfully!');
+        fetchLaptops();
+      } else {
+        alert('Error: ' + (await response.text()));
+      }
+    }
+
+    // Check in a laptop
+    async function checkInLaptop(id) {
+      const response = await fetch('/checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        alert('Laptop checked in successfully!');
+        fetchLaptops();
+      } else {
+        alert('Error: ' + (await response.text()));
+      }
+    }
+
+    // Load laptops on page load
+    fetchLaptops();
+  </script>
+</body>
+</html>
