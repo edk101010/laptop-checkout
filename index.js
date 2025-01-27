@@ -1,7 +1,8 @@
 const express = require('express');
+const fs = require('fs'); // For working with files
+const path = require('path');
 const app = express();
 const port = 3000;
-const path = require('path');
 
 // Middleware to handle JSON requests
 app.use(express.json());
@@ -13,10 +14,39 @@ app.get('/', (req, res) => {
 
 // Sample list of laptops
 const laptops = [
-  { id: 1, model: 'Dell XPS 13', status: 'available', checkedOutBy: null, checkedOutAt: null },
-  { id: 2, model: 'MacBook Pro', status: 'available', checkedOutBy: null, checkedOutAt: null },
-  { id: 3, model: 'HP Spectre', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 1, model: 'Dayton Laptop 1', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 2, model: 'Dayton Laptop 2', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 3, model: 'Dayton Laptop 3', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 4, model: 'King-Lincoln MacBook Pro 1', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 5, model: 'King-Lincoln MacBook Pro 2', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 6, model: 'King-Lincoln MacBook Pro 3', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 7, model: 'King-Lincoln iPad 1', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 8, model: 'King-Lincoln iPad 2', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 2, model: 'King-Lincoln iPad 3', status: 'available', checkedOutBy: null, checkedOutAt: null },
 ];
+
+// Function to get the current EST timestamp
+function getESTTimestamp() {
+  const now = new Date();
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(now);
+}
+
+// Function to log actions to a file
+function logAction(action, laptop, user = null) {
+  const timestamp = getESTTimestamp();
+  const logEntry = `[${timestamp}] ${action} - Laptop: ${laptop.model}, User: ${user || 'N/A'}\n`;
+
+  // Append the log entry to the file
+  fs.appendFileSync('logs.txt', logEntry, 'utf8');
+}
 
 // Route to list all laptops
 app.get('/laptops', (req, res) => {
@@ -37,7 +67,9 @@ app.post('/checkout', (req, res) => {
 
   laptop.status = 'checked out';
   laptop.checkedOutBy = user;
-  laptop.checkedOutAt = new Date().toLocaleString(); // Add the current date and time
+  laptop.checkedOutAt = getESTTimestamp(); // Use the EST timestamp
+
+  logAction('Checked Out', laptop, user);
   res.send(`Laptop ${laptop.model} checked out by ${user}`);
 });
 
@@ -55,7 +87,9 @@ app.post('/checkin', (req, res) => {
 
   laptop.status = 'available';
   laptop.checkedOutBy = null;
-  laptop.checkedOutAt = null; // Clear the timestamp
+  laptop.checkedOutAt = null;
+
+  logAction('Checked In', laptop);
   res.send(`Laptop ${laptop.model} checked in`);
 });
 
