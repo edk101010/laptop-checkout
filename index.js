@@ -22,7 +22,7 @@ const laptops = [
   { id: 6, model: 'King-Lincoln MacBook Pro 3', status: 'available', checkedOutBy: null, checkedOutAt: null },
   { id: 7, model: 'King-Lincoln iPad 1', status: 'available', checkedOutBy: null, checkedOutAt: null },
   { id: 8, model: 'King-Lincoln iPad 2', status: 'available', checkedOutBy: null, checkedOutAt: null },
-  { id: 2, model: 'King-Lincoln iPad 3', status: 'available', checkedOutBy: null, checkedOutAt: null },
+  { id: 2, model: 'King-Lincoln iPad 3gi', status: 'available', checkedOutBy: null, checkedOutAt: null },
 ];
 
 // Function to get the current EST timestamp
